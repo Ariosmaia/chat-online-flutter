@@ -1,32 +1,44 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
   runApp(MyApp());
 
-  // Escrever ou ler
-  Firestore.instance
-      // Qual coleção viu usar
-      .collection('mensagens')
-      // Qual o documento
-      // Deixar vazio cria um id unico
-      .document('ble7RdMCzl7se8Mjagu3')
-      // Qual dados vou colocar
-      .setData({"texto": "Td bem?", "from": "Marcelo", "read": false});
+  // Ler somente uma vez
+  QuerySnapshot snapshot =
+      await Firestore.instance.collection('mensagens').getDocuments();
+  snapshot.documents.forEach((d) {
+    print(d.data);
 
-  // Para atualizar só um dado posso usar o updateData ao invés de setData
-  Firestore.instance
-      .collection('mensagens')
-      .document('ble7RdMCzl7se8Mjagu3')
-      .updateData({"read": true});
+    // Ler pelo ID do documento
+    print(d.documentID);
 
-  // Subcoleções
+    // Atualizar cada um dos documentos
+    d.reference.updateData({'read': true});
+  });
+
+  // Dados de uma imagem em especifico
+  DocumentSnapshot snapshotDoc = await Firestore.instance
+      .collection('mensagens')
+      .document('XYyfrLKPzQcH1YNRT6vi')
+      .get();
+  print(snapshotDoc.data);
+
+  // Atualizações em tempo real coleções
+  Firestore.instance.collection('mensagens').snapshots().listen((dado) {
+    dado.documents.forEach((d) {
+      print(d.data);
+    });
+  });
+
+  // Atualizações em tempo real documentos
   Firestore.instance
       .collection('mensagens')
-      .document('ble7RdMCzl7se8Mjagu3')
-      .collection('arquivos')
-      .document()
-      .setData({"arqname": 'foto.png'});
+      .document('XYyfrLKPzQcH1YNRT6vi')
+      .snapshots()
+      .listen((dado) {
+    print(dado.data);
+  });
 }
 
 class MyApp extends StatelessWidget {
